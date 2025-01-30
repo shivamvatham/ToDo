@@ -1,6 +1,6 @@
 // Get references to the DOM elements
 const taskInput = document.getElementById('taskInput');
-const taskDate = document.getElementById('taskDate');
+const taskDateTime = document.getElementById('taskDateTime');
 const addTaskButton = document.getElementById('addTaskButton');
 const taskList = document.getElementById('taskList');
 const showAll = document.getElementById('showAll');
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', loadTasks);
 function loadTasks() {
     const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
     tasks.forEach(task => {
-        addTaskToDOM(task.text, task.date, task.completed);
+        addTaskToDOM(task.text, task.dateTime, task.completed);
     });
     applyFilter('all'); // Show all tasks by default
 }
@@ -23,7 +23,7 @@ function loadTasks() {
 // Function to add a new task
 function addTask() {
     const taskText = taskInput.value.trim();
-    const taskDueDate = taskDate.value;
+    const taskDueDateTime = taskDateTime.value;
 
     if (taskText === '') {
         alert('Please enter a task.');
@@ -31,18 +31,18 @@ function addTask() {
     }
 
     // Add the task to the DOM
-    addTaskToDOM(taskText, taskDueDate, false);
+    addTaskToDOM(taskText, taskDueDateTime, false);
 
     // Save tasks to local storage
     saveTasks();
 
     // Clear the input fields
     taskInput.value = '';
-    taskDate.value = '';
+    taskDateTime.value = '';
 }
 
 // Function to add a task to the DOM
-function addTaskToDOM(taskText, taskDueDate, isCompleted) {
+function addTaskToDOM(taskText, taskDueDateTime, isCompleted) {
     const li = document.createElement('li');
     if (isCompleted) {
         li.classList.add('completed');
@@ -51,9 +51,9 @@ function addTaskToDOM(taskText, taskDueDate, isCompleted) {
     const taskSpan = document.createElement('span');
     taskSpan.textContent = taskText;
 
-    const taskDateSpan = document.createElement('span');
-    taskDateSpan.className = 'task-date';
-    taskDateSpan.textContent = taskDueDate ? `(Due: ${taskDueDate})` : '';
+    const taskDateTimeSpan = document.createElement('span');
+    taskDateTimeSpan.className = 'task-datetime';
+    taskDateTimeSpan.textContent = taskDueDateTime ? `(Due: ${formatDateTime(taskDueDateTime)})` : '';
 
     const actions = document.createElement('div');
     actions.className = 'actions';
@@ -87,9 +87,15 @@ function addTaskToDOM(taskText, taskDueDate, isCompleted) {
     actions.appendChild(editButton);
     actions.appendChild(deleteButton);
     li.appendChild(taskSpan);
-    li.appendChild(taskDateSpan);
+    li.appendChild(taskDateTimeSpan);
     li.appendChild(actions);
     taskList.appendChild(li);
+}
+
+// Function to format date and time
+function formatDateTime(dateTimeString) {
+    const dateTime = new Date(dateTimeString);
+    return dateTime.toLocaleString(); // Format as "MM/DD/YYYY, HH:MM:SS AM/PM"
 }
 
 // Function to save tasks to local storage
@@ -98,7 +104,7 @@ function saveTasks() {
     taskList.querySelectorAll('li').forEach(li => {
         tasks.push({
             text: li.querySelector('span').textContent,
-            date: li.querySelector('.task-date').textContent.replace('(Due: ', '').replace(')', ''),
+            dateTime: li.querySelector('.task-datetime').textContent.replace('(Due: ', '').replace(')', ''),
             completed: li.classList.contains('completed')
         });
     });
