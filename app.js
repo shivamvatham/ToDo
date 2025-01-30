@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', loadTasks);
 // Function to load tasks from local storage
 function loadTasks() {
     const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    tasks.sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime)); // Sort by date and time
     tasks.forEach(task => {
         addTaskToDOM(task.text, task.dateTime, task.completed);
     });
@@ -47,6 +48,9 @@ function addTaskToDOM(taskText, taskDueDateTime, isCompleted) {
     if (isCompleted) {
         li.classList.add('completed');
     }
+
+    // Store the raw dateTime value in a dataset attribute
+    li.dataset.datetime = taskDueDateTime;
 
     const taskSpan = document.createElement('span');
     taskSpan.textContent = taskText;
@@ -102,12 +106,21 @@ function formatDateTime(dateTimeString) {
 function saveTasks() {
     const tasks = [];
     taskList.querySelectorAll('li').forEach(li => {
+        const taskText = li.querySelector('span').textContent;
+        const taskDateTime = li.dataset.datetime; // Retrieve the raw dateTime value from the dataset
+        const isCompleted = li.classList.contains('completed');
+
         tasks.push({
-            text: li.querySelector('span').textContent,
-            dateTime: li.querySelector('.task-datetime').textContent.replace('(Due: ', '').replace(')', ''),
-            completed: li.classList.contains('completed')
+            text: taskText,
+            dateTime: taskDateTime, // Store the raw dateTime value
+            completed: isCompleted
         });
     });
+
+    // Sort tasks by date and time
+    tasks.sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime));
+
+    // Save tasks to local storage
     localStorage.setItem('tasks', JSON.stringify(tasks));
 }
 
